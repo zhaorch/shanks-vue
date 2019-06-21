@@ -8,3 +8,11 @@ export function getAppList (params) {
     params
   })
 }
+
+export function apiCreateAppList (data) {
+  return request({
+    url: `${localHost}/apps/`,
+    method: 'post',
+    data
+  })
+}

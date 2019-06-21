@@ -47,7 +47,7 @@
       </el-table-column>
       <el-table-column label="User" min-width="100px" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.user.username }}</span>
+          <span>{{ scope.row.user | filterUserName }}</span>
         </template>
       </el-table-column>
       <el-table-column label="created_time" min-width="100px" align="center">
@@ -75,16 +75,52 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+        <el-form-item label="Name" prop="name">
+          <el-input v-model="temp.name" />
+        </el-form-item>
+        <el-form-item label="Name_exe" prop="name_exe">
+          <el-input v-model="temp.name_exe" />
+        </el-form-item>
+        <el-form-item label="Path" prop="path">
+          <el-input v-model="temp.path" />
+        </el-form-item>
+        <el-form-item label="Version" prop="version">
+          <el-input v-model="temp.version" />
+        </el-form-item>
+        <el-form-item label="User" prop="user">
+          <template>
+            <el-select v-model="temp.user" value-key="id" filterable placeholder="请选择">
+              <el-option
+                v-for="item in userList"
+                :key="item.id"
+                :label="item.username"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </template>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">
+          Cancel
+        </el-button>
+        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
+          Confirm
+        </el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 <script>
-import { getAppList } from '@/api/project'
+import { getAppList, apiCreateAppList } from '@/api/project'
+import { getUserList } from '@/api/user'
 import waves from '@/directive/waves'
 // eslint-disable-next-line no-unused-vars
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination'
+
+let userMap = {}
 
 export default {
   name: 'appMana',
@@ -93,12 +129,16 @@ export default {
   filters: {
     parseTime (type) {
       return parseTime(type)
+    },
+    filterUserName (userID) {
+      return userMap[userID]
     }
   },
   data () {
     return {
       tableKey: 0,
       list: null,
+      userList: null,
       total: 0,
       listLoading: false,
       listQuery: {
@@ -126,7 +166,8 @@ export default {
         name: [{ required: true, message: 'name is required', trigger: 'blur' }],
         name_exe: [{ required: true, message: 'name_exe is required', trigger: 'blur' }],
         path: [{ required: true, message: 'path is required', trigger: 'blur' }],
-        version: [{ required: true, message: 'version is required', trigger: 'blur' }]
+        version: [{ required: true, message: 'version is required', trigger: 'blur' }],
+        user: [{ required: true, message: 'user is required', trigger: 'blur' }]
       },
       downloadLoading: false
     }
@@ -137,7 +178,7 @@ export default {
   },
   methods: {
     init () {
-
+      this.InitUserList()
     },
     getList () {
       this.listLoading = true
@@ -148,6 +189,18 @@ export default {
         setTimeout(() => {
           this.listLoading = false
         }, 0.5 * 1000)
+      })
+    },
+    InitUserList () {
+      this.listLoading = true
+      getUserList({limit: 99999}).then(response => {
+        this.userList = response.data.results
+        userMap = response.data.results.reduce((acc, cur) => {
+          acc[cur.id] = cur.username
+          return acc
+        }, {})
+        debugger
+        this.listLoading = false
       })
     },
     sortChange (data) {
@@ -164,8 +217,42 @@ export default {
       }
       this.handleFilter()
     },
+    resetTemp () {
+      this.temp = {
+        id: undefined,
+        name: '',
+        name_exe: '',
+        path: '',
+        version: '',
+        user: undefined,
+        params: []
+      }
+    },
     handleCreate () {
-
+      this.resetTemp()
+      this.dialogStatus = 'create'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    createData () {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.temp)
+          apiCreateAppList(tempData).then((response) => {
+            // this.temp.id = response.data.id
+            this.list.push(response.data)
+            this.dialogFormVisible = false
+            this.$notify({
+              title: 'Success',
+              message: 'Created Successfully',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }
+      })
     },
     handleFilter () {
       this.listQuery.page = 1
