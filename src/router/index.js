@@ -47,6 +47,12 @@ export const constantRoutes = [
         meta: { title: 'User', icon: 'user' }
       },
       {
+        path: 'app',
+        name: 'app',
+        component: () => import('@/views/app/index'),
+        meta: { title: 'App', icon: 'form' }
+      },
+      {
         path: 'tree',
         name: 'Tree',
         component: () => import('@/views/tree/index'),
