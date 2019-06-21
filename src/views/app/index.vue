@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.username" placeholder="名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.search" placeholder="名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
 
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Search
@@ -24,7 +24,7 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Name" sortable="custom" min-width="100px" >
+      <el-table-column label="Name" prop="name" sortable="custom" min-width="100px" >
         <template slot-scope="{row}">
           <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
           <el-tag>{{ row.version }}</el-tag>
@@ -104,7 +104,7 @@ export default {
       listQuery: {
         page: 1,
         limit: 10,
-        name: undefined,
+        search: '',
         sort: '+name'
       },
       temp: {
@@ -168,7 +168,8 @@ export default {
 
     },
     handleFilter () {
-
+      this.listQuery.page = 1
+      this.getList()
     },
     handleDownload () {
 
