@@ -52,7 +52,7 @@
       </el-table-column>
       <el-table-column label="created_time" min-width="100px" align="center">
         <template slot-scope="scope">
-          <span>{{ new Date(scope.row.created_time)|parseTime}}</span>
+          <span>{{ new Date(scope.row.created_time) | parseTime}}</span>
         </template>
       </el-table-column>
       <el-table-column label="updated_time" min-width="100px" align="center">
