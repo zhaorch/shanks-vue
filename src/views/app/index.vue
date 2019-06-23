@@ -185,7 +185,7 @@
   </div>
 </template>
 <script>
-import {getAppList, apiCreateAppList} from '@/api/project'
+import {getAppList, apiCreateAppList,apiUpdateAppList} from '@/api/project'
 import {getUserList} from '@/api/user'
 import waves from '@/directive/waves'
 // eslint-disable-next-line no-unused-vars
@@ -334,7 +334,35 @@ export default {
 
     },
     handleUpdate (row) {
-
+      this.temp = Object.assign({}, row) // copy obj
+      this.dialogStatus = 'update'
+      this.dialogFormVisible = true
+      this.$nextTick(() => {
+        this.$refs['dataForm'].clearValidate()
+      })
+    },
+    updateData () {
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          const tempData = Object.assign({}, this.temp)
+          apiUpdateAppList(tempData).then((response) => {
+            for (const v of this.list) {
+              if (v.id === response.data.id) {
+                const index = this.list.indexOf(v)
+                this.list.splice(index, 1, response.data)
+                break
+              }
+            }
+            this.dialogFormVisible = false
+            this.$notify({
+              title: 'Success',
+              message: 'Update Successfully',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }
+      })
     },
     handleDelete (row) {
 

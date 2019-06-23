@@ -16,3 +16,11 @@ export function apiCreateAppList (data) {
     data
   })
 }
+
+export function apiUpdateAppList (data) {
+  return request({
+    url: `${localHost}/apps/${data.id}/`,
+    method: 'patch',
+    data
+  })
+}
