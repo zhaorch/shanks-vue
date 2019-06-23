@@ -1,15 +1,18 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.search" placeholder="名称" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
+      <el-input v-model="listQuery.search" placeholder="名称" style="width: 200px;" class="filter-item"
+                @keyup.enter.native="handleFilter"/>
 
       <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
         Search
       </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit"
+                 @click="handleCreate">
         Add
       </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
+      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download"
+                 @click="handleDownload">
         Export
       </el-button>
     </div>
@@ -24,7 +27,7 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Name" prop="name" sortable="custom" min-width="100px" >
+      <el-table-column label="Name" prop="name" sortable="custom" min-width="100px">
         <template slot-scope="{row}">
           <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
           <el-tag>{{ row.version }}</el-tag>
@@ -60,7 +63,8 @@
           <span>{{ scope.row.updated_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Actions" align="center" width="170px" fixed="right" class-name="small-padding fixed-width">
+      <el-table-column label="Actions" align="center" width="170px" fixed="right"
+                       class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="handleUpdate(row)">
             编辑
@@ -72,22 +76,36 @@
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit"
+                @pagination="getList"/>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-        <el-form-item label="Name" prop="name">
-          <el-input v-model="temp.name" />
-        </el-form-item>
-        <el-form-item label="Name_exe" prop="name_exe">
-          <el-input v-model="temp.name_exe" />
-        </el-form-item>
-        <el-form-item label="Path" prop="path">
-          <el-input v-model="temp.path" />
-        </el-form-item>
-        <el-form-item label="Version" prop="version">
-          <el-input v-model="temp.version" />
-        </el-form-item>
+      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px"
+               style="width: 800px; margin-left:50px;">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="Name" prop="name">
+              <el-input v-model="temp.name"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Name_exe" prop="name_exe">
+              <el-input v-model="temp.name_exe"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="Path" prop="path">
+              <el-input v-model="temp.path"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="Version" prop="version">
+              <el-input v-model="temp.version"/>
+            </el-form-item>
+          </el-col>
+        </el-row>
         <el-form-item label="User" prop="user">
           <template>
             <el-select v-model="temp.user" value-key="id" filterable placeholder="请选择">
@@ -100,8 +118,62 @@
             </el-select>
           </template>
         </el-form-item>
+        <el-form-item label="Params" prop="params">
+          <el-table
+            :key="tableKeyParamEdit"
+            :data="temp.params"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%;"
+          >
+            <el-table-column type="index"></el-table-column>
+            <el-table-column label="Name" prop="name" min-width="100px">
+              <template slot-scope="scope">
+                <span v-if="scope.row.isSet">
+                    <el-input size="mini" placeholder="请输入内容" v-model="scope.row.name"/>
+                </span>
+                <span v-else>{{ scope.row.name }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Value" min-width="100px">
+              <template slot-scope="scope">
+                <span v-if="scope.row.isSet">
+                    <el-input size="mini" placeholder="请输入内容" v-model="scope.row.value"/>
+                </span>
+                <span v-else>{{ scope.row.value }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Desc" min-width="100px" align="center">
+              <template slot-scope="scope">
+                 <span v-if="scope.row.isSet">
+                    <el-input size="mini" placeholder="请输入内容" v-model="scope.row.desc"/>
+                </span>
+                <span v-else>{{ scope.row.desc }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Visiable" min-width="100px" align="center">
+              <template slot-scope="scope">
+                <el-checkbox v-model="scope.row.is_visiable"></el-checkbox>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="100">
+              <template slot-scope="scope">
+                <span class="el-tag el-tag--info el-tag--mini" style="cursor: pointer;" @click="handleEditParam(scope.row,scope.$index)">
+                   {{scope.row.isSet?'保存':"修改"}}
+                </span>
+                <span class="el-tag el-tag--danger el-tag--mini" style="cursor: pointer;">
+                   删除
+                </span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
+        <el-button type="success" style="margin-right: 450px" @click="handleAddParam">
+          Add Param
+        </el-button>
         <el-button @click="dialogFormVisible = false">
           Cancel
         </el-button>
@@ -113,19 +185,19 @@
   </div>
 </template>
 <script>
-import { getAppList, apiCreateAppList } from '@/api/project'
-import { getUserList } from '@/api/user'
+import {getAppList, apiCreateAppList} from '@/api/project'
+import {getUserList} from '@/api/user'
 import waves from '@/directive/waves'
 // eslint-disable-next-line no-unused-vars
-import { parseTime } from '@/utils'
+import {parseTime} from '@/utils'
 import Pagination from '@/components/Pagination'
 
 let userMap = {}
 
 export default {
   name: 'appMana',
-  components: { Pagination },
-  directives: { waves },
+  components: {Pagination},
+  directives: {waves},
   filters: {
     parseTime (type) {
       return parseTime(type)
@@ -137,6 +209,7 @@ export default {
   data () {
     return {
       tableKey: 0,
+      tableKeyParamEdit: 2,
       list: null,
       userList: null,
       total: 0,
@@ -163,11 +236,11 @@ export default {
         create: 'Create'
       },
       rules: {
-        name: [{ required: true, message: 'name is required', trigger: 'blur' }],
-        name_exe: [{ required: true, message: 'name_exe is required', trigger: 'blur' }],
-        path: [{ required: true, message: 'path is required', trigger: 'blur' }],
-        version: [{ required: true, message: 'version is required', trigger: 'blur' }],
-        user: [{ required: true, message: 'user is required', trigger: 'blur' }]
+        name: [{required: true, message: 'name is required', trigger: 'blur'}],
+        name_exe: [{required: true, message: 'name_exe is required', trigger: 'blur'}],
+        path: [{required: true, message: 'path is required', trigger: 'blur'}],
+        version: [{required: true, message: 'version is required', trigger: 'blur'}],
+        user: [{required: true, message: 'user is required', trigger: 'blur'}]
       },
       downloadLoading: false
     }
@@ -199,12 +272,11 @@ export default {
           acc[cur.id] = cur.username
           return acc
         }, {})
-        debugger
         this.listLoading = false
       })
     },
     sortChange (data) {
-      const { prop, order } = data
+      const {prop, order} = data
       if (prop === 'name') {
         this.sortByID(order)
       }
@@ -266,6 +338,21 @@ export default {
     },
     handleDelete (row) {
 
+    },
+    handleAddParam () {
+      let newParam = {name: '', value: '', desc: '', is_visiable: true, isSet: true}
+      this.temp.params.push(newParam)
+    },
+    handleEditParam (row, index) {
+      // 点击修改 判断是否已经保存所有操作
+      for (let i of this.temp.params) {
+        if (i.isSet && row !== i) {
+          this.$message.warning('请先保存当前编辑项')
+          return false
+        }
+      }
+      row.isSet = !row.isSet
+      return true
     }
   }
 }
