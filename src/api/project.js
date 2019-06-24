@@ -9,7 +9,7 @@ export function getAppList (params) {
   })
 }
 
-export function apiCreateAppList (data) {
+export function apiCreateApp (data) {
   return request({
     url: `${localHost}/apps/`,
     method: 'post',
@@ -17,10 +17,17 @@ export function apiCreateAppList (data) {
   })
 }
 
-export function apiUpdateAppList (data) {
+export function apiUpdateApp (data) {
   return request({
     url: `${localHost}/apps/${data.id}/`,
     method: 'patch',
     data
+  })
+}
+
+export function apiDeleteApp (id) {
+  return request({
+    url: `${localHost}/apps/${id}/`,
+    method: 'delete'
   })
 }

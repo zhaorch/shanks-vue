@@ -121,17 +121,24 @@
         <el-form-item label="Params" prop="params">
           <el-table
             :key="tableKeyParamEdit"
+            ref="tableParam"
             :data="temp.params"
             border
             fit
             highlight-current-row
             style="width: 100%;"
+            height="300"
           >
             <el-table-column type="index"></el-table-column>
+            <el-table-column label="Visiable" min-width="100px">
+              <template slot-scope="scope">
+                <span>{{ scope.row.isSet }}</span>
+              </template>
+            </el-table-column>
             <el-table-column label="Name" prop="name" min-width="100px">
               <template slot-scope="scope">
                 <span v-if="scope.row.isSet">
-                    <el-input size="mini" placeholder="请输入内容" v-model="scope.row.name"/>
+                    <el-input size="small" placeholder="请输入内容" v-model="scope.row.name"/>
                 </span>
                 <span v-else>{{ scope.row.name }}</span>
               </template>
@@ -139,32 +146,32 @@
             <el-table-column label="Value" min-width="100px">
               <template slot-scope="scope">
                 <span v-if="scope.row.isSet">
-                    <el-input size="mini" placeholder="请输入内容" v-model="scope.row.value"/>
+                    <el-input size="medium" placeholder="请输入内容" v-model="scope.row.value"/>
                 </span>
                 <span v-else>{{ scope.row.value }}</span>
               </template>
             </el-table-column>
             <el-table-column label="Desc" min-width="100px" align="center">
-              <template slot-scope="scope">
-                 <span v-if="scope.row.isSet">
-                    <el-input size="mini" placeholder="请输入内容" v-model="scope.row.desc"/>
+              <template slot-scope="{row}">
+                 <span v-if="row.isSet">
+                    <el-input size="mini" placeholder="请输入内容" v-model="row.desc"/>
                 </span>
-                <span v-else>{{ scope.row.desc }}</span>
+                <span v-else>{{ row.desc }}</span>
               </template>
             </el-table-column>
             <el-table-column label="Visiable" min-width="100px" align="center">
-              <template slot-scope="scope">
-                <el-checkbox v-model="scope.row.is_visiable"></el-checkbox>
+              <template slot-scope="{row}">
+                <el-checkbox :disabled="!row.isSet" v-model="row.is_visiable"></el-checkbox>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="100">
+            <el-table-column label="操作" width="150">
               <template slot-scope="scope">
-                <span class="el-tag el-tag--info el-tag--mini" style="cursor: pointer;" @click="handleEditParam(scope.row,scope.$index)">
-                   {{scope.row.isSet?'保存':"修改"}}
-                </span>
-                <span class="el-tag el-tag--danger el-tag--mini" style="cursor: pointer;">
-                   删除
-                </span>
+                <el-button :type="!scope.row.isSet?'primary':'success'" size="mini" @click="handleEditParam(scope.row,scope.$index)">
+                  {{scope.row.isSet?'保存':"修改"}}
+                </el-button>
+                <el-button type="danger" size="mini" @click="handleDeleteParam(scope.row,scope.$index)">
+                  删除
+                </el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -174,7 +181,7 @@
         <el-button type="success" style="margin-right: 450px" @click="handleAddParam">
           Add Param
         </el-button>
-        <el-button @click="dialogFormVisible = false">
+        <el-button @click="handleCancel">
           Cancel
         </el-button>
         <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
@@ -185,11 +192,11 @@
   </div>
 </template>
 <script>
-import {getAppList, apiCreateAppList,apiUpdateAppList} from '@/api/project'
+import {getAppList, apiCreateApp, apiUpdateApp, apiDeleteApp} from '@/api/project'
 import {getUserList} from '@/api/user'
 import waves from '@/directive/waves'
 // eslint-disable-next-line no-unused-vars
-import {parseTime} from '@/utils'
+import {parseTime, deepClone} from '@/utils'
 import Pagination from '@/components/Pagination'
 
 let userMap = {}
@@ -312,7 +319,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          apiCreateAppList(tempData).then((response) => {
+          apiCreateApp(tempData).then((response) => {
             // this.temp.id = response.data.id
             this.list.push(response.data)
             this.dialogFormVisible = false
@@ -334,7 +341,14 @@ export default {
 
     },
     handleUpdate (row) {
-      this.temp = Object.assign({}, row) // copy obj
+      // this.temp = Object.assign({}, row) // copy obj
+      this.temp = deepClone(row) // copy obj
+      // for (let index in this.temp.params) {
+      //   this.temp.params[index].isSet = false
+      // }
+      for (let i of this.temp.params) {
+        i.isSet = false
+      }
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
       this.$nextTick(() => {
@@ -345,7 +359,7 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          apiUpdateAppList(tempData).then((response) => {
+          apiUpdateApp(tempData).then((response) => {
             for (const v of this.list) {
               if (v.id === response.data.id) {
                 const index = this.list.indexOf(v)
@@ -365,22 +379,56 @@ export default {
       })
     },
     handleDelete (row) {
-
+      this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        apiDeleteApp(row.id).then((response) => {
+          this.$notify({
+            title: 'Success',
+            message: 'Delete Successfully',
+            type: 'success',
+            duration: 2000
+          })
+          const index = this.list.indexOf(row)
+          this.list.splice(index, 1)
+        }).catch((e) => {
+          this.$message.error(e.message)
+        })
+      }).catch(() => {
+        this.$notify({
+          title: 'Cancel',
+          type: 'info',
+          message: '已取消删除',
+          duration: 2000
+        })
+      })
     },
     handleAddParam () {
       let newParam = {name: '', value: '', desc: '', is_visiable: true, isSet: true}
       this.temp.params.push(newParam)
     },
+    handleCancel () {
+      this.dialogFormVisible = false
+    },
     handleEditParam (row, index) {
       // 点击修改 判断是否已经保存所有操作
-      for (let i of this.temp.params) {
-        if (i.isSet && row !== i) {
-          this.$message.warning('请先保存当前编辑项')
-          return false
-        }
-      }
+      // for (let i of this.temp.params) {
+      //   if (i.isSet && row !== i) {
+      //     this.$message.warning('请先保存当前编辑项')
+      //     return false
+      //   }
+      // }
       row.isSet = !row.isSet
-      return true
+
+      // 修改的时候必须加上这两句。。否则 界面不更新
+      this.$refs.tableParam.setCurrentRow()
+      this.$refs.tableParam.setCurrentRow(row)
+      // return true
+    },
+    handleDeleteParam (row, index) {
+      this.temp.params.splice(index, 1)
     }
   }
 }
