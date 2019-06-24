@@ -28,40 +28,6 @@ export const constantRoutes = [
   },
 
   {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
-    children: [
-      {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'user',
-        name: 'user',
-        component: () => import('@/views/user/index'),
-        meta: { title: 'User', icon: 'user' }
-      },
-      {
-        path: 'app',
-        name: 'app',
-        component: () => import('@/views/app/index'),
-        meta: { title: 'App', icon: 'form' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
-      }
-    ]
-  },
-
-  {
     path: '/form',
     component: Layout,
     children: [
@@ -139,6 +105,47 @@ export const constantRoutes = [
       {
         path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
         meta: { title: 'External Link', icon: 'link' }
+      }
+    ]
+  }
+
+]
+
+/**
+ * asyncRoutes
+ * the routes that need to be dynamically loaded based on user roles
+ */
+export const asyncRoutes = [
+  {
+    path: '/example',
+    component: Layout,
+    redirect: '/example/table',
+    name: 'Example',
+    meta: { title: 'Example', icon: 'example' },
+    children: [
+      {
+        path: 'table',
+        name: 'Table',
+        component: () => import('@/views/table/index'),
+        meta: { title: 'Table', icon: 'table' }
+      },
+      {
+        path: 'user',
+        name: 'user',
+        component: () => import('@/views/user/index'),
+        meta: { title: 'User', icon: 'user', roles: ['admin'] }
+      },
+      {
+        path: 'app',
+        name: 'app',
+        component: () => import('@/views/app/index'),
+        meta: { title: 'App', icon: 'form' }
+      },
+      {
+        path: 'tree',
+        name: 'Tree',
+        component: () => import('@/views/tree/index'),
+        meta: { title: 'Tree', icon: 'tree' }
       }
     ]
   },
