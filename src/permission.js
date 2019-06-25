@@ -32,8 +32,8 @@ router.beforeEach(async (to, from, next) => {
         try {
           // get user info
           store.dispatch('user/getInfo2').then(res => { // 拉取info
-            const username = res.data.username
-            store.dispatch('changeRoles', username)
+            const username = res.username
+            store.dispatch('user/changeRoles', username)
           }).catch(err => {
             console.log(err)
           })
