@@ -260,6 +260,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.profile.anniversary = parseTime(tempData.profile.anniversary, '{y}-{m}-{d}')
+          tempData.profile.just_datetime = parseTime(tempData.profile.just_datetime, '{y}-{m}-{d} {h}:{i}:{s}')
           apiCreateGrade(tempData).then((response) => {
             // this.temp.id = response.data.id
             this.list.push(response.data)
@@ -295,6 +296,7 @@ export default {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.profile.anniversary = parseTime(tempData.profile.anniversary, '{y}-{m}-{d}')
+          tempData.profile.just_datetime = parseTime(tempData.profile.just_datetime, '{y}-{m}-{d} {h}:{i}:{s}')
           apiUpdateGrade(tempData).then((response) => {
             for (const v of this.list) {
               if (v.id === response.data.id) {
