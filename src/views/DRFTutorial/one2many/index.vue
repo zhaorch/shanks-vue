@@ -27,30 +27,30 @@
       style="width: 100%;"
       @sort-change="sortChange"
     >
-      <el-table-column label="Name" prop="name" sortable="custom" min-width="100px">
+      <el-table-column label="Grade" min-width="100px" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.grade | filterGradeName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="No" prop="no" sortable="custom" min-width="100px">
         <template slot-scope="{row}">
-          <span class="link-type" @click="handleUpdate(row)">{{ row.name }}</span>
+          <span class="link-type" @click="handleUpdate(row)">{{ row.no }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Desc" min-width="100px">
+      <el-table-column label="Name" min-width="100px">
         <template slot-scope="scope">
-          <span>{{ scope.row.desc}}</span>
+          <span>{{ scope.row.name}}</span>
         </template>
       </el-table-column>
-      <el-table-column label="Email" min-width="100px">
+      <el-table-column label="Gender" min-width="100px">
         <template slot-scope="scope">
-          <span v-if="scope.row.profile">{{scope.row.profile.email}}</span>
-          <span v-else></span>
+          <span v-if="scope.row.gender">男</span>
+          <span v-else>女</span>
         </template>
       </el-table-column>
-      <el-table-column label="created_time" min-width="100px" align="center">
+      <el-table-column label="Birthday" min-width="100px" align="center">
         <template slot-scope="scope">
-          <span>{{ new Date(scope.row.created_time) | parseTime}}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="updated_time" min-width="100px" align="center">
-        <template slot-scope="scope">
-          <span>{{ scope.row.updated_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span>{{ scope.row.birthday}}</span>
         </template>
       </el-table-column>
       <el-table-column label="Actions" align="center" width="170px" fixed="right"
@@ -74,51 +74,95 @@
                style="width: 800px; margin-left:50px;">
         <el-row>
           <el-col :span="12">
+            <el-form-item label="No" prop="no">
+              <el-input v-model="temp.no"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="Name" prop="name">
               <el-input v-model="temp.name"/>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
-            <el-form-item label="Desc" prop="desc">
-              <el-input v-model="temp.desc"/>
-            </el-form-item>
-          </el-col>
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="Email" prop="profile.email">
-              <el-input v-model="temp.profile.email"/>
+            <el-form-item label="Gender" prop="gender">
+              <el-radio-group v-model="temp.gender">
+                <el-radio-button label="true">男</el-radio-button>
+                <el-radio-button label="false">女</el-radio-button>
+              </el-radio-group>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="Star" prop="profile.star">
-              <el-input v-model="temp.profile.star"/>
+            <el-form-item label="Birthday" prop="birthday">
+              <el-date-picker v-model="temp.birthday" type="date" placeholder="Please pick a date" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="班庆日" prop="profile.type">
-              <el-date-picker v-model="temp.profile.anniversary" type="date" placeholder="Please pick a date" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="日期时间" prop="birthday">
-              <el-date-picker v-model="temp.profile.just_datetime" type="datetime" placeholder="Please pick a date" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="Type" prop="profile.type">
+        <el-form-item label="Grade" prop="grade">
           <template>
-            <el-select v-model="temp.profile.type" value-key="id" filterable placeholder="请选择">
-              <el-option v-for="item in typeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
+            <el-select v-model="temp.grade" value-key="id" filterable placeholder="请选择">
+              <el-option
+                v-for="item in gradeList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+              </el-option>
             </el-select>
           </template>
+        </el-form-item>
+        <el-form-item label="Goods" prop="goods">
+          <el-table
+            :key="tableKeyGoodsEdit"
+            ref="tableParam"
+            :data="temp.goods"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%;"
+            height="300"
+          >
+            <el-table-column type="index"></el-table-column>
+            <el-table-column label="Name" prop="name" min-width="100px">
+              <template slot-scope="scope">
+                <span v-if="scope.row.isSet">
+                    <el-input size="small" placeholder="请输入内容" v-model="scope.row.name"/>
+                </span>
+                <span v-else>{{ scope.row.name }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Price" min-width="100px">
+              <template slot-scope="scope">
+                <span v-if="scope.row.isSet">
+                  <el-input-number size="small" v-model="scope.row.price" :precision="2" :step="0.1" :max="100"></el-input-number>
+                </span>
+                <span v-else>{{ scope.row.price }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="Number" min-width="100px" align="center">
+              <template slot-scope="{row}">
+                 <span v-if="row.isSet">
+                    <el-input-number size="small" v-model="row.number" :min="1" :max="10" label="描述文字"></el-input-number>
+                </span>
+                <span v-else>{{ row.number }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="150">
+              <template slot-scope="scope">
+                <el-button :type="!scope.row.isSet?'primary':'success'" size="mini" @click="handleEditParam(scope.row,scope.$index)">
+                  {{scope.row.isSet?'保存':"修改"}}
+                </el-button>
+                <el-button type="danger" size="mini" @click="handleDeleteParam(scope.row,scope.$index)">
+                  删除
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="success" style="margin-right: 450px" @click="handleAddParam">
-          Add Param
+          Add Goods
         </el-button>
         <el-button @click="handleCancel">
           Cancel
@@ -131,7 +175,7 @@
   </div>
 </template>
 <script>
-import {apiGetGradeList, apiCreateGrade, apiUpdateGrade, apiDeleteGrade} from '@/api/drftutorial'
+import {apiGetStudentList, apiGetGradeList, apiCreateStudent, apiUpdateStudent, apiDeleteStudent} from '@/api/drftutorial'
 import waves from '@/directive/waves'
 // eslint-disable-next-line no-unused-vars
 import {parseTime, deepClone} from '@/utils'
@@ -143,26 +187,27 @@ const typeOptions = [
   { key: 3, display_name: '艺术班' }
 ]
 
-// const typeKeyValue = typeOptions.reduce((acc, cur) => {
-//   acc[cur.key] = cur.display_name
-//   return acc
-// }, {})
+let gradeMap = {}
 
 export default {
-  name: 'one2oneMana',
+  name: 'one2manyMana',
   components: {Pagination},
   directives: {waves},
   filters: {
     parseTime (type) {
       return parseTime(type)
+    },
+    filterGradeName (gradeID) {
+      return gradeMap[gradeID]
     }
   },
   data () {
     return {
       tableKey: 0,
-      tableKeyParamEdit: 2,
+      tableKeyGoodsEdit: 2,
       list: null,
       typeOptions: typeOptions,
+      gradeList: null,
       total: 0,
       listLoading: false,
       listQuery: {
@@ -173,16 +218,11 @@ export default {
       },
       temp: {
         id: undefined,
+        no: '',
         name: '',
-        desc: '',
-        profile: {
-          id: undefined,
-          email: '',
-          star: '',
-          anniversary: new Date(),
-          just_datetime: new Date(),
-          type: 1
-        }
+        gender: true,
+        birthday: new Date(),
+        goods: []
       },
       dialogFormVisible: false,
       dialogStatus: '',
@@ -191,25 +231,37 @@ export default {
         create: 'Create'
       },
       rules: {
+        no: [{required: true, message: 'no is required', trigger: 'blur'}],
         name: [{required: true, message: 'name is required', trigger: 'blur'}],
-        name_exe: [{required: true, message: 'name_exe is required', trigger: 'blur'}],
-        path: [{required: true, message: 'path is required', trigger: 'blur'}],
-        version: [{required: true, message: 'version is required', trigger: 'blur'}],
-        user: [{required: true, message: 'user is required', trigger: 'blur'}]
+        gender: [{required: true, message: 'gender is required', trigger: 'blur'}],
+        birthday: [{required: true, message: 'birthday is required', trigger: 'blur'}],
+        grade: [{required: true, message: 'grade is required', trigger: 'blur'}]
       },
       downloadLoading: false
     }
   },
   created () {
     this.init()
-    this.getList()
   },
   methods: {
     init () {
+      this.InitGradeList()
+    },
+    InitGradeList () {
+      this.listLoading = true
+      apiGetGradeList({limit: 99999}).then(response => {
+        this.gradeList = response.data.results
+        gradeMap = response.data.results.reduce((acc, cur) => {
+          acc[cur.id] = cur.name
+          return acc
+        }, {})
+        this.getList()
+        this.listLoading = false
+      })
     },
     getList () {
       this.listLoading = true
-      apiGetGradeList(this.listQuery).then(response => {
+      apiGetStudentList(this.listQuery).then(response => {
         this.list = response.data.results
         this.total = response.data.count
         // Just to simulate the time of the request
@@ -235,16 +287,11 @@ export default {
     resetTemp () {
       this.temp = {
         id: undefined,
+        no: '',
         name: '',
-        desc: '',
-        profile: {
-          id: undefined,
-          email: '',
-          star: '',
-          anniversary: new Date(),
-          just_datetime: new Date(),
-          type: 1
-        }
+        gender: true,
+        birthday: new Date(),
+        goods: []
       }
     },
     handleCreate () {
@@ -259,9 +306,8 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.profile.anniversary = parseTime(tempData.profile.anniversary, '{y}-{m}-{d}')
-          tempData.profile.just_datetime = parseTime(tempData.profile.just_datetime, '{y}-{m}-{d} {h}:{i}:{s}')
-          apiCreateGrade(tempData).then((response) => {
+          tempData.birthday = parseTime(tempData.birthday, '{y}-{m}-{d}')
+          apiCreateStudent(tempData).then((response) => {
             // this.temp.id = response.data.id
             this.list.push(response.data)
             this.dialogFormVisible = false
@@ -295,9 +341,8 @@ export default {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
-          tempData.profile.anniversary = parseTime(tempData.profile.anniversary, '{y}-{m}-{d}')
-          tempData.profile.just_datetime = parseTime(tempData.profile.just_datetime, '{y}-{m}-{d} {h}:{i}:{s}')
-          apiUpdateGrade(tempData).then((response) => {
+          tempData.birthday = parseTime(tempData.birthday, '{y}-{m}-{d}')
+          apiUpdateStudent(tempData).then((response) => {
             for (const v of this.list) {
               if (v.id === response.data.id) {
                 const index = this.list.indexOf(v)
@@ -322,7 +367,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        apiDeleteGrade(row.id).then((response) => {
+        apiDeleteStudent(row.id).then((response) => {
           this.$notify({
             title: 'Success',
             message: 'Delete Successfully',
@@ -344,8 +389,8 @@ export default {
       })
     },
     handleAddParam () {
-      let newParam = {name: '', value: '', desc: '', is_visiable: true, isSet: true}
-      this.temp.params.push(newParam)
+      let newParam = {name: '', price: 0, number: 1, isSet: true}
+      this.temp.goods.push(newParam)
     },
     handleCancel () {
       this.dialogFormVisible = false
@@ -366,7 +411,7 @@ export default {
       // return true
     },
     handleDeleteParam (row, index) {
-      this.temp.params.splice(index, 1)
+      this.temp.goods.splice(index, 1)
     }
   }
 }

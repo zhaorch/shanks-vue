@@ -25,9 +25,40 @@ export function apiUpdateGrade (data) {
   })
 }
 
-export function apiDeleteApp (id) {
+export function apiDeleteGrade (id) {
   return request({
-    url: `/apps/${id}/`,
+    url: `/api/grades/${id}/`,
+    method: 'delete'
+  })
+}
+
+export function apiGetStudentList (params) {
+  return request({
+    url: `/api/students/`,
+    method: 'get',
+    params
+  })
+}
+
+export function apiCreateStudent (data) {
+  return request({
+    url: `/api/students/`,
+    method: 'post',
+    data
+  })
+}
+
+export function apiUpdateStudent (data) {
+  return request({
+    url: `/api/students/${data.id}/`,
+    method: 'patch',
+    data
+  })
+}
+
+export function apiDeleteStudent (id) {
+  return request({
+    url: `/api/students/${id}/`,
     method: 'delete'
   })
 }

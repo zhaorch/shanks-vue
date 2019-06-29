@@ -157,16 +157,16 @@ export const asyncRoutes = [
     meta: { title: 'DRFtutorial', icon: 'example' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
         path: 'one2one',
         name: 'one2one',
         component: () => import('@/views/DRFtutorial/one2one/index'),
         meta: { title: 'One2One', icon: 'table' }
+      },
+      {
+        path: 'one2many',
+        name: 'one2many',
+        component: () => import('@/views/DRFtutorial/one2many/index'),
+        meta: { title: 'One2Many', icon: 'table' }
       }
     ]
   },
