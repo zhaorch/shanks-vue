@@ -32,6 +32,7 @@ export function apiDeleteGrade (id) {
   })
 }
 
+// -------------------------------------------------------
 export function apiGetStudentList (params) {
   return request({
     url: `/api/students/`,
@@ -59,6 +60,38 @@ export function apiUpdateStudent (data) {
 export function apiDeleteStudent (id) {
   return request({
     url: `/api/students/${id}/`,
+    method: 'delete'
+  })
+}
+
+// -------------------------------------------------------
+export function apiGetCourseList (params) {
+  return request({
+    url: `/api/courses/`,
+    method: 'get',
+    params
+  })
+}
+
+export function apiCreateCourse (data) {
+  return request({
+    url: `/api/courses/`,
+    method: 'post',
+    data
+  })
+}
+
+export function apiUpdateCourse (data) {
+  return request({
+    url: `/api/courses/${data.id}/`,
+    method: 'patch',
+    data
+  })
+}
+
+export function apiDeleteCourse (id) {
+  return request({
+    url: `/api/courses/${id}/`,
     method: 'delete'
   })
 }

@@ -157,6 +157,12 @@ export const asyncRoutes = [
     meta: { title: 'DRFtutorial', icon: 'example' },
     children: [
       {
+        path: 'single-table',
+        name: 'single-table',
+        component: () => import('@/views/DRFtutorial/single-table/index'),
+        meta: { title: 'SingleTable', icon: 'table' }
+      },
+      {
         path: 'one2one',
         name: 'one2one',
         component: () => import('@/views/DRFtutorial/one2one/index'),
