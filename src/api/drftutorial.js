@@ -64,6 +64,21 @@ export function apiDeleteStudent (id) {
   })
 }
 
+export function apiStudentListStudentCourse () {
+  return request({
+    url: `/api/students/list_student_course/`,
+    method: 'get'
+  })
+}
+
+export function apiStudentSetCourse (data) {
+  return request({
+    url: `/api/students/${data.id}/set_course/`,
+    method: 'post',
+    data
+  })
+}
+
 // -------------------------------------------------------
 export function apiGetCourseList (params) {
   return request({

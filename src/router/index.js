@@ -173,6 +173,12 @@ export const asyncRoutes = [
         name: 'one2many',
         component: () => import('@/views/DRFtutorial/one2many/index'),
         meta: { title: 'One2Many', icon: 'table' }
+      },
+      {
+        path: 'many2many',
+        name: 'many2many',
+        component: () => import('@/views/DRFtutorial/many2many/index'),
+        meta: { title: 'Many2Many', icon: 'table' }
       }
     ]
   },
