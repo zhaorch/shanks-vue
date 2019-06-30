@@ -63,16 +63,16 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="No" prop="no">
-              <el-input v-model="temp.no" disabled/>
+              <el-input v-model="temp.no" readonly="true"/>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="Name" prop="name">
-              <el-input v-model="temp.name" disabled/>
+              <el-input v-model="temp.name" readonly="true"/>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="Goods" prop="goods">
+        <el-form-item label="Courses" prop="courses">
           <el-table
             :key="tableKeyGoodsEdit"
             ref="tableParam"
@@ -122,7 +122,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="success" style="margin-right: 450px" @click="handleAddParam">
-          Add Goods
+          Add Course
         </el-button>
         <el-button @click="handleCancel">
           Cancel
