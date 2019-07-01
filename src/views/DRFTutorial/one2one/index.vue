@@ -216,6 +216,9 @@ export default {
         setTimeout(() => {
           this.listLoading = false
         }, 0.5 * 1000)
+      }).catch((e) => {
+        this.listLoading = false
+        this.$message.error(e.message)
       })
     },
     sortChange (data) {
