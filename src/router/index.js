@@ -179,6 +179,12 @@ export const asyncRoutes = [
         name: 'many2many',
         component: () => import('@/views/DRFtutorial/many2many/index'),
         meta: { title: 'Many2Many', icon: 'table' }
+      },
+      {
+        path: 'tinymce',
+        name: 'tinymce',
+        component: () => import('@/views/DRFtutorial/tinymce-test/index'),
+        meta: { title: 'TinymcdTest', icon: 'table' }
       }
     ]
   },
