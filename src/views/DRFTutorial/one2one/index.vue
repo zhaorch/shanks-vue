@@ -69,7 +69,7 @@
     <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit"
                 @pagination="getList"/>
 
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible" style="margin-top:-100px;" @open="handleOpenDialog">
       <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="100px"
                style="width: 800px; margin-left:50px;">
         <el-row>
@@ -132,11 +132,13 @@
             <el-button size="mini" @click="toggleShow">设置头像</el-button>
           </template>
         </el-form-item>
+        <el-form-item label="OtherInfo" prop="profile.info">
+          <template>
+            <tinymce ref="refTinyMce" v-model="temp.profile.info" :height="200" />
+          </template>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="success" style="margin-right: 450px" @click="handleAddParam">
-          Add Param
-        </el-button>
         <el-button @click="handleCancel">
           Cancel
         </el-button>
@@ -154,6 +156,7 @@ import waves from '@/directive/waves'
 import {parseTime, deepClone} from '@/utils'
 import Pagination from '@/components/Pagination'
 import myUpload from 'vue-image-crop-upload'
+import Tinymce from '@/components/Tinymce'
 
 const typeOptions = [
   { key: 1, display_name: '文科班' },
@@ -168,7 +171,7 @@ const typeOptions = [
 
 export default {
   name: 'one2oneMana',
-  components: {Pagination, myUpload},
+  components: {Pagination, myUpload, Tinymce},
   directives: {waves},
   filters: {
     parseTime (type) {
@@ -200,7 +203,8 @@ export default {
           anniversary: new Date(),
           just_datetime: new Date(),
           type: 1,
-          logo: null
+          logo: null,
+          info: ''
         }
       },
       dialogFormVisible: false,
@@ -264,6 +268,9 @@ export default {
       this.handleFilter()
     },
     resetTemp () {
+      if (this.$refs.refTinyMce !== undefined) {
+        this.$refs.refTinyMce.hasChange = false
+      }
       this.temp = {
         id: undefined,
         name: '',
@@ -275,7 +282,8 @@ export default {
           anniversary: new Date(),
           just_datetime: new Date(),
           type: 1,
-          logo: null
+          logo: null,
+          info: ''
         }
       }
     },
@@ -315,10 +323,14 @@ export default {
       this.listQuery.page = 1
       this.getList()
     },
+    handleOpenDialog () {
+      console.log('打开')
+    },
     handleDownload () {
 
     },
     handleUpdate (row) {
+      this.resetTemp()
       // this.temp = Object.assign({}, row) // copy obj
       this.temp = deepClone(row) // copy obj
       if (this.temp.profile === undefined || this.temp.profile === null) {
@@ -328,7 +340,9 @@ export default {
           star: '',
           anniversary: new Date(),
           just_datetime: new Date(),
-          type: 1
+          type: 1,
+          logo: null,
+          info: ''
         }
       }
       this.dialogStatus = 'update'
