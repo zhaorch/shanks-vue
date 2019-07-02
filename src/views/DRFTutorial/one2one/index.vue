@@ -115,6 +115,23 @@
             </el-select>
           </template>
         </el-form-item>
+        <el-form-item label="Logo" prop="profile.logo">
+          <template>
+            <my-upload field="img"
+                       @crop-success="cropSuccess"
+                       @crop-upload-success="cropUploadSuccess"
+                       @crop-upload-fail="cropUploadFail"
+                       v-model="showImageDialog"
+                       :width="64"
+                       :height="64"
+                       url=""
+                       :params="imageParams"
+                       :headers="imageHeaders"
+                       img-format="png"></my-upload>
+            <img :src="temp.profile.logo">
+            <el-button size="mini" @click="toggleShow">设置头像</el-button>
+          </template>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="success" style="margin-right: 450px" @click="handleAddParam">
@@ -136,6 +153,7 @@ import waves from '@/directive/waves'
 // eslint-disable-next-line no-unused-vars
 import {parseTime, deepClone} from '@/utils'
 import Pagination from '@/components/Pagination'
+import myUpload from 'vue-image-crop-upload'
 
 const typeOptions = [
   { key: 1, display_name: '文科班' },
@@ -150,7 +168,7 @@ const typeOptions = [
 
 export default {
   name: 'one2oneMana',
-  components: {Pagination},
+  components: {Pagination, myUpload},
   directives: {waves},
   filters: {
     parseTime (type) {
@@ -181,7 +199,8 @@ export default {
           star: '',
           anniversary: new Date(),
           just_datetime: new Date(),
-          type: 1
+          type: 1,
+          logo: null
         }
       },
       dialogFormVisible: false,
@@ -197,7 +216,16 @@ export default {
         version: [{required: true, message: 'version is required', trigger: 'blur'}],
         user: [{required: true, message: 'user is required', trigger: 'blur'}]
       },
-      downloadLoading: false
+      downloadLoading: false,
+      showImageDialog: false,
+      resetImage: false,
+      imageParams: {
+        token: '123456798',
+        name: 'avatar'
+      },
+      imageHeaders: {
+        smail: '*_~'
+      }
     }
   },
   created () {
@@ -246,7 +274,8 @@ export default {
           star: '',
           anniversary: new Date(),
           just_datetime: new Date(),
-          type: 1
+          type: 1,
+          logo: null
         }
       }
     },
@@ -264,6 +293,10 @@ export default {
           const tempData = Object.assign({}, this.temp)
           tempData.profile.anniversary = parseTime(tempData.profile.anniversary, '{y}-{m}-{d}')
           tempData.profile.just_datetime = parseTime(tempData.profile.just_datetime, '{y}-{m}-{d} {h}:{i}:{s}')
+          // if (!this.resetImage) {
+          //   // 默认值给的null，如果给undefined 则该属性不会传给后台
+          //   tempData.profile.logo = null
+          // }
           apiCreateGrade(tempData).then((response) => {
             // this.temp.id = response.data.id
             this.list.push(response.data)
@@ -288,8 +321,19 @@ export default {
     handleUpdate (row) {
       // this.temp = Object.assign({}, row) // copy obj
       this.temp = deepClone(row) // copy obj
+      if (this.temp.profile === undefined || this.temp.profile === null) {
+        this.temp.profile = {
+          id: undefined,
+          email: '',
+          star: '',
+          anniversary: new Date(),
+          just_datetime: new Date(),
+          type: 1
+        }
+      }
       this.dialogStatus = 'update'
       this.dialogFormVisible = true
+      this.resetImage = false
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
@@ -300,6 +344,9 @@ export default {
           const tempData = Object.assign({}, this.temp)
           tempData.profile.anniversary = parseTime(tempData.profile.anniversary, '{y}-{m}-{d}')
           tempData.profile.just_datetime = parseTime(tempData.profile.just_datetime, '{y}-{m}-{d} {h}:{i}:{s}')
+          if (!this.resetImage) {
+            tempData.profile.logo = undefined
+          }
           apiUpdateGrade(tempData).then((response) => {
             for (const v of this.list) {
               if (v.id === response.data.id) {
@@ -370,6 +417,42 @@ export default {
     },
     handleDeleteParam (row, index) {
       this.temp.params.splice(index, 1)
+    },
+    toggleShow () {
+      this.showImageDialog = !this.showImageDialog
+    },
+    /**
+     * crop success
+     *
+     * [param] imgDataUrl
+     * [param] field
+     */
+    cropSuccess (imgDataUrl, field) {
+      console.log('-------- crop success --------')
+      this.temp.profile.logo = imgDataUrl
+      this.resetImage = true
+    },
+    /**
+     * upload success
+     *
+     * [param] jsonData   服务器返回数据，已进行json转码
+     * [param] field
+     */
+    cropUploadSuccess (jsonData, field) {
+      console.log('-------- upload success --------')
+      console.log(jsonData)
+      console.log('field: ' + field)
+    },
+    /**
+     * upload fail
+     *
+     * [param] status    server api return error status, like 500
+     * [param] field
+     */
+    cropUploadFail (status, field) {
+      console.log('-------- upload fail --------')
+      console.log(status)
+      console.log('field: ' + field)
     }
   }
 }
